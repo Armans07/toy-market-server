@@ -35,7 +35,7 @@ async function run() {
 
     const result = await toyCollections.createIndex(indexKeys, indexOptions);
 
-    app.get("jobsSearchByName/:text", async (req,res) => {
+    app.get("jobsSearchByName/:text", async (req, res) => {
       const searchText = req.params.text;
 
       const result = await toyCollections
@@ -100,23 +100,20 @@ async function run() {
 
     // Update toy
 
-    app.patch("/updatedToy/:id", async (req, res) => {
+
+    app.put("/updatedToy/:id", async (req, res) => {
       const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updateBooking = req.body;
-      console.log(updateBooking);
-      const updateDoc = {
+      const body = req.body;
+      const filter = { _id: new ObjectId() };
+      const updatedDoc = {
         $set: {
-          status: updateBooking.status,
+          toyName: body.toyName,
+          category: body.category,
         },
       };
-
-
-
-      
-      const result = await bookingCollection.updateOne(filter, updateDoc);
-      res.send(result);
+      const result = await toyCollections.updateOne(filter,updatedDoc)
     });
+
 
     // Delete toy
 
