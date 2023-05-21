@@ -30,6 +30,26 @@ async function run() {
 
     const toyCollections = client.db("toyShop").collection("toyAdd");
 
+    const indexKeys = { toyName: -1 };
+    const indexOptions = { name: "toyName" };
+
+    const result = await toyCollections.createIndex(indexKeys, indexOptions);
+
+    app.get("jobsSearchByName/:text", async (req,res) => {
+      const searchText = req.params.text;
+
+      const result = await toyCollections
+        .find({
+          $or: [
+            {
+              toyName: { $regex: text, $options: "i" },
+            },
+          ],
+        })
+        .toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -80,20 +100,21 @@ async function run() {
 
     // Update toy
 
-    app.put("/updatedToy/:id", async (req, res) => {
+    app.patch("/updatedToy/:id", async (req, res) => {
       const id = req.params.id;
-      const body = req.body;
       const filter = { _id: new ObjectId(id) };
+      const updateBooking = req.body;
+      console.log(updateBooking);
       const updateDoc = {
         $set: {
-          toyName: body.toyName,
-          photoURL: body.photoURL,
-          ratting: body.ratting,
-          toyPrice: body.toyPrice,
-          availableQuantity: body.availableQuantity,
+          status: updateBooking.status,
         },
       };
-      const result = await toyCollections.updateOne(filter, updateDoc);
+
+
+
+      
+      const result = await bookingCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
 
