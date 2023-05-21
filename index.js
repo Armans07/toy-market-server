@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -36,13 +36,31 @@ async function run() {
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
 
-    app.get("/alltoy", async (req, res) => {
-      const result = await toyCollections.find({}).toArray();
+    // Sub Category
+
+    app.get("alltoy/:category", async (req, res) => {
+      const result = await toyCollections
+        .find({ category: req.params.category })
+        .toArray();
       res.send(result);
     });
 
+    // All toys
+
+    app.get("/alltoy", async (req, res) => {
+      const result = await toyCollections
+        .find({})
+        .sort({ createdAt: -1 })
+        .toArray();
+      res.send(result);
+    });
+
+    //  Add toy
+
     app.post("/addtoy", async (req, res) => {
       const body = req.body;
+      body.createdAt = new Date();
+
       const result = await toyCollections.insertOne(body);
       console.log(result);
       if (!body) {
@@ -51,6 +69,7 @@ async function run() {
       res.send(result);
     });
 
+    // My toy
 
     app.get("/mytoy/:email", async (req, res) => {
       const result = await toyCollections
@@ -59,7 +78,33 @@ async function run() {
       res.send(result);
     });
 
-    
+    // Update toy
+
+    app.put("/updatedToy/:id", async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          toyName: body.toyName,
+          photoURL: body.photoURL,
+          ratting: body.ratting,
+          toyPrice: body.toyPrice,
+          availableQuantity: body.availableQuantity,
+        },
+      };
+      const result = await toyCollections.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // Delete toy
+
+    app.delete("/remove/:id", async (req, res) => {
+      const result = await toyCollections.deleteOne({
+        _id: new ObjectId(req.params.id),
+      });
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
