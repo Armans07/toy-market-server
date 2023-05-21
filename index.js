@@ -36,22 +36,30 @@ async function run() {
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
 
+    app.get("/alltoy", async (req, res) => {
+      const result = await toyCollections.find({}).toArray();
+      res.send(result);
+    });
+
     app.post("/addtoy", async (req, res) => {
       const body = req.body;
       const result = await toyCollections.insertOne(body);
-
       console.log(result);
-
       if (!body) {
         return res.status(404).send({ message: "body data not found" });
       }
       res.send(result);
     });
 
-    app.get("/alltoy", async (req, res) => {
-      const result = await toyCollections.find({}).toArray();
+
+    app.get("/mytoy/:email", async (req, res) => {
+      const result = await toyCollections
+        .find({ sellerEmail: req.params.email })
+        .toArray();
       res.send(result);
     });
+
+    
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
