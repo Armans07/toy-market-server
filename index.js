@@ -128,7 +128,7 @@ async function run() {
     app.put("/updatedToy/:id", async (req, res) => {
       const id = req.params.id;
       const body = req.body;
-      const filter = { _id: new ObjectId() };
+      const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
           toyName: body.toyName,
@@ -136,6 +136,7 @@ async function run() {
         },
       };
       const result = await toyCollections.updateOne(filter, updatedDoc);
+      res.send(result)
     });
 
     // Delete toy
